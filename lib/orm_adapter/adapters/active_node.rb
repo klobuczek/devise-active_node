@@ -24,12 +24,7 @@ module OrmAdapter
 
     # @see OrmAdapter::Base#find_all
     def find_all(options = {})
-      klass
-      .order(options.delete :order)
-      .where(options.delete :conditions)
-      .limit(options.delete :limit)
-      .offset(options.delete :offset)
-      .where(options)
+      construct_graph(klass, options)
     end
 
     # @see OrmAdapter::Base#create!
@@ -40,6 +35,22 @@ module OrmAdapter
     # @see OrmAdapter::Base#destroy
     def destroy(object)
       object.destroy && true if valid_object?(object)
+    end
+
+    protected
+    def construct_graph(graph, options)
+      conditions, order, limit, offset = extract_conditions!(options)
+
+      graph = graph.where(conditions || {})
+      graph = graph.order(order_clause(order)) if order.any?
+      graph = graph.limit(limit) if limit
+      graph = graph.offset(offset) if offset
+
+      graph
+    end
+
+    def order_clause(order)
+      order.map {|pair| "#{pair[0]} #{pair[1]}"}.join(",")
     end
   end
 end
