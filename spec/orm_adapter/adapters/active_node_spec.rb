@@ -10,6 +10,7 @@ else
       attribute :rating, type: Integer
 
       has_many :notes, type: :owner, direction: :incoming
+      has_one :user
     end
 
     class Note < ActiveNode::Base
